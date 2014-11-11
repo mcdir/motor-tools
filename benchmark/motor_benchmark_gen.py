@@ -32,16 +32,24 @@ def insert(callback, db, collection, object):
     for i in range(per_trial):
         to_insert = object.copy()
         to_insert["x"] = i
-        yield motor.Op(db[collection].insert, to_insert, safe=False)
+        yield motor.Op(db[collection].insert, to_insert)
     callback()
 
-
-@gen.engine
+""" see https://github.com/mongodb/motor/blob/master/doc/changelog.rst """
+# @gen.coroutine
+# def insert_batch(callback, db, collection, object):
+#     f= db[collection].insert([object] * batch_size)
+#     for i in range(per_trial / batch_size):
+#         yield [f]
+#     callback()
+#     return
+# @gen.engine
+# def insert_batch(callback, db, collection, object):
+#     for i in range(per_trial / batch_size):
+#         yield motor.Op(db[collection].insert, [object] * batch_size)
+#     callback()
 def insert_batch(callback, db, collection, object):
-    for i in range(per_trial / batch_size):
-        yield motor.Op(db[collection].insert, [object] * batch_size, safe=False)
     callback()
-
 
 @gen.engine
 def find_one(callback, db, collection, x):
@@ -50,13 +58,17 @@ def find_one(callback, db, collection, x):
     callback()
 
 
-@gen.engine
+# @gen.engine
+# def find(callback, db, collection, x):
+#     for _ in range(per_trial):
+#         yield motor.Op(db[collection].find({"x": x}).to_list)
+#     callback()
+
 def find(callback, db, collection, x):
-    for _ in range(per_trial):
-        yield motor.Op(db[collection].find({"x": x}).to_list)
     callback()
 
 
 if __name__ == "__main__":
-    trial_db = motor.MotorClient().open_sync().benchmark
+    #trial_db = motor.MotorClient().open_sync().benchmark
+    trial_db = motor.MotorClient(host='127.0.0.1', max_pool_size=6000, connectTimeoutMS=None).benchmark
     main(globals())

@@ -40,8 +40,12 @@ def insert(callback, asyncdb, collection, object):
             i[0] -= 1
             to_insert = object.copy()
             to_insert["x"] = i
-            asyncdb[collection].insert(
-                to_insert, callback=inner_insert, safe=(not is_motor))
+            if is_motor:
+                asyncdb[collection].insert(
+                    to_insert, callback=inner_insert)
+            else:
+                asyncdb[collection].insert(
+                    to_insert, callback=inner_insert, safe=(not is_motor))
 
     inner_insert(None, None)
 
@@ -62,10 +66,16 @@ def insert_batch(callback, asyncdb, collection, object):
             callback()
         else:
             i[0] -= 1
-            asyncdb[collection].insert(
-                [object.copy() for _ in range(batch_size)],
-                callback=inner_insert_batch,
-                safe=(not is_motor))
+            if is_motor:
+                asyncdb[collection].insert(
+                    [object.copy() for _ in range(batch_size)],
+                    callback=inner_insert_batch)
+            else:
+                asyncdb[collection].insert(
+                    [object.copy() for _ in range(batch_size)],
+                    callback=inner_insert_batch,
+                    safe=(not is_motor))
+
 
     inner_insert_batch(None, None)
 

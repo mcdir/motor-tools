@@ -36,11 +36,12 @@ def find(callback, asyncdb, collection, x):
             callback()
         else:
             i[0] -= 1
-            asyncdb[collection].find({"x": x}).to_list(callback=inner_find)
+            asyncdb[collection].find({"x": x}).to_list(10,callback=inner_find)
 
     inner_find(None, None)
 
 
 if __name__ == "__main__":
-    trial_db = motor.MotorClient().open_sync().benchmark
+    #trial_db = motor.MotorClient().open_sync().benchmark
+    trial_db = motor.MotorClient(host='127.0.0.1', max_pool_size=6000, connectTimeoutMS=None).benchmark
     main(globals())

@@ -1,2 +1,5 @@
 *.pyc
 /benchmark2/data/
+/.settings/
+/.buildpath
+/.project
